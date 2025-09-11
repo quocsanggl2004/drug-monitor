@@ -1,3 +1,29 @@
+// Tính số lượng thuốc cần mua cho đủ số ngày
+exports.calculatePurchase = async (req, res) => {
+    const days = Number(req.body.days || req.query.days);
+    if (!days || days <= 0) {
+        return res.status(400).send({ message: "Invalid days" });
+    }
+    try {
+        const drugs = await Drugdb.find();
+        // Giả sử mỗi thuốc có perDay là số lượng cần dùng mỗi ngày
+        const result = drugs.map((drug, idx) => {
+            // Số pack cần mua = ceil(perDay * days / packSize), packSize giả sử là 1 (nếu có trường packSize thì dùng)
+            // Số card cần mua = ceil(perDay * days / cardSize), cardSize giả sử là 1 (nếu có trường cardSize thì dùng)
+            // Nếu không có packSize/cardSize, chỉ tính tổng số cần dùng
+            const total = drug.perDay * days;
+            return {
+                id: drug._id,
+                drugName: drug.name,
+                cardsToBuy: Math.ceil(total),
+                packsToBuy: Math.ceil(total),
+            };
+        });
+        res.send(result);
+    } catch (err) {
+        res.status(500).send({ message: err.message || "Error calculating purchase" });
+    }
+};
 let Drugdb = require('../model/model');
 
 

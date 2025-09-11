@@ -30,10 +30,8 @@
 				<td><%= drugs[i].perDay %></td>
 				<td><%= drugs[i].dosage %></td>
 				<td>
-					<a href="/update-drug?id=<%= drugs[i]._id%>">
-						<span class='fa fa-edit'></span>
-					</a>
-					<a class="delete" data-id=<%= drugs[i]._id%> ><!-- give each delete button a unique ID -->
+					<button class="update" data-id="<%= drugs[i]._id%>" data-index="<%= i %>">Update</button>
+					<a class="delete" data-id=<%= drugs[i]._id%> >
 						<span class='fa fa-trash'></span>
 					</a>
 				</td>
@@ -43,6 +41,74 @@
 	</table>
 </main>
 <!-- End main section -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	document.querySelectorAll('.delete').forEach(function(btn) {
+		btn.addEventListener('click', function() {
+			const id = btn.getAttribute('data-id');
+			if(confirm('Bạn có chắc muốn xóa thuốc này?')) {
+				fetch(`/api/drugs/${id}`, { method: 'DELETE' })
+					.then(res => res.json())
+					.then(data => {
+						alert(data.message || 'Đã xóa!');
+						location.reload();
+					})
+					.catch(err => alert('Lỗi xóa thuốc!'));
+			}
+		});
+	});
+
+	// Update inline
+	document.querySelectorAll('.update').forEach(function(btn) {
+		btn.addEventListener('click', function() {
+			const id = btn.getAttribute('data-id');
+			const row = btn.closest('tr');
+			// Lấy dữ liệu hiện tại
+			const name = row.children[1].innerText;
+			const card = row.children[2].innerText;
+			const pack = row.children[3].innerText;
+			const perDay = row.children[4].innerText;
+			const dosage = row.children[5].innerText;
+
+			// Tạo form chỉnh sửa
+			row.innerHTML = `<td></td>
+				<td><input value="${name}" id="edit-name"></td>
+				<td><input value="${card}" id="edit-card" type="number"></td>
+				<td><input value="${pack}" id="edit-pack" type="number"></td>
+				<td><input value="${perDay}" id="edit-perDay" type="number"></td>
+				<td><input value="${dosage}" id="edit-dosage"></td>
+				<td>
+					<button id="save-update">Save</button>
+					<button id="cancel-update">Cancel</button>
+				</td>`;
+
+			document.getElementById('save-update').onclick = function() {
+				fetch(`/api/drugs/${id}`, {
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						name: document.getElementById('edit-name').value,
+						card: document.getElementById('edit-card').value,
+						pack: document.getElementById('edit-pack').value,
+						perDay: document.getElementById('edit-perDay').value,
+						dosage: document.getElementById('edit-dosage').value
+					})
+				})
+				.then(res => res.json())
+				.then(data => {
+					alert('Cập nhật thành công!');
+					location.reload();
+				})
+				.catch(err => alert('Lỗi cập nhật!'));
+			};
+
+			document.getElementById('cancel-update').onclick = function() {
+				location.reload();
+			};
+		});
+	});
+});
+</script>
 <!-- add footer -->
 <%- include('includes/_footer') %>
 <!-- end footer

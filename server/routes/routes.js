@@ -1,3 +1,5 @@
+// API tính toán số lượng thuốc cần mua cho đủ số ngày
+
 const express = require('express');// As in the server.js
 const route = express.Router(); //Allows us use express router in this file
 const services = require('../services/render');//uses the render.js file from services here
@@ -16,7 +18,7 @@ route.get('/purchase', services.purchase);
 route.get('/add-drug', services.addDrug);
 route.get('/update-drug', services.updateDrug);
 
-
+route.post('/api/calculate-purchase', controller.calculatePurchase);
 
 // API for CRUD operations
 

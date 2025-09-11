@@ -110,3 +110,26 @@ exports.delete = (req,res)=>{
         });
 
 }
+
+
+// purchase function: giảm số lượng pack của thuốc
+exports.purchase = async (req, res) => {
+    const { id, quantity } = req.body;
+    if (!id || !quantity || Number(quantity) <= 0) {
+        return res.status(400).send({ message: "Missing or invalid id/quantity" });
+    }
+    try {
+        const drug = await Drugdb.findById(id);
+        if (!drug) {
+            return res.status(404).send({ message: `Drug with id ${id} not found` });
+        }
+        if (drug.pack < quantity) {
+            return res.status(400).send({ message: `Not enough pack. Available: ${drug.pack}` });
+        }
+        drug.pack -= Number(quantity);
+        await drug.save();
+        res.send({ message: `Purchased ${quantity} pack(s) of ${drug.name}. Remaining: ${drug.pack}` });
+    } catch (err) {
+        res.status(500).send({ message: err.message || "Error during purchase" });
+    }
+};

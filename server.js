@@ -10,6 +10,10 @@ const PORT = process.env.PORT || 3100; //uses either what's in our env or 3100 a
 app.set('view engine', 'ejs');//Put before app.use, etc. Lets us use EJS for views
 //use body-parser to parse requests
 app.use(bodyParser.urlencoded({extended:true}));
+// parse JSON bodies from API clients (e.g., Postman raw JSON)
+// Thêm dòng này sau bodyParser.urlencoded
+app.use(express.json());
+app.use(bodyParser.json());
 //indicates which is the folder where static files are served from
 app.use(express.static('assets'));
 //use morgan to log http requests

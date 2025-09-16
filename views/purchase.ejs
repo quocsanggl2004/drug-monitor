@@ -14,6 +14,7 @@
 	   <th>Drug Name</th>
 	   <th>Cards to Buy</th>
 	   <th>Packs to Buy</th>
+	   <th>Purchase</th>
 	  </tr>
 	 </thead>
 	 <tbody id="purchase_body">
@@ -22,6 +23,7 @@
 	</table>
 </main>
 <script>
+
 function renderTable(data) {
 	const body = document.getElementById('purchase_body');
 	body.innerHTML = '';
@@ -31,7 +33,33 @@ function renderTable(data) {
 			<td>${drug.drugName}</td>
 			<td>${drug.cardsToBuy}</td>
 			<td>${drug.packsToBuy}</td>
+			<td>
+				<form class="purchase-form" data-id="${drug.id}">
+					<input type="number" name="quantity" min="1" max="${drug.packsToBuy}" value="1" style="width:60px;">
+					<button type="submit">Buy</button>
+				</form>
+			</td>
 		</tr>`;
+	});
+	// Gắn sự kiện cho các form mua thuốc
+	document.querySelectorAll('.purchase-form').forEach(form => {
+		form.addEventListener('submit', function(e) {
+			e.preventDefault();
+			const id = form.getAttribute('data-id');
+			const quantity = form.querySelector('input[name="quantity"]').value;
+			fetch('/api/purchase', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ id, quantity })
+			})
+			.then(res => res.json())
+			.then(data => {
+				alert(data.message || 'Đã mua thành công!');
+				// Sau khi mua, reload lại bảng
+				document.getElementById('drug_days').dispatchEvent(new Event('submit'));
+			})
+			.catch(() => alert('Lỗi mua thuốc!'));
+		});
 	});
 }
 

@@ -18,11 +18,17 @@ let schema = new mongoose.Schema({
         type: Number,
         required: true
     },
+
     perDay : {
         type: Number,
         required: true,
         unique: true
     },
+    price: {
+        type: Number,
+        required: true,
+        default: 10000 // Giá mặc định mỗi pack, có thể thay đổi
+    }
 })
 
 const DrugDB = mongoose.model('drugs', schema);//drugs specifies the collection name, database to use was specified in connection string

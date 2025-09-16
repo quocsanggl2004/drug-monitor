@@ -138,7 +138,9 @@ exports.delete = (req,res)=>{
 }
 
 
-// purchase function: giảm số lượng pack của thuốc
+
+// purchase function: giảm số lượng pack, tính tổng giá, lưu transaction
+const TransactionDB = require('../model/transaction');
 exports.purchase = async (req, res) => {
     const { id, quantity } = req.body;
     if (!id || !quantity || Number(quantity) <= 0) {
@@ -152,9 +154,22 @@ exports.purchase = async (req, res) => {
         if (drug.pack < quantity) {
             return res.status(400).send({ message: `Not enough pack. Available: ${drug.pack}` });
         }
+        // Tính tổng giá
+        const pricePerPack = drug.price || 10000;
+        const totalPrice = pricePerPack * Number(quantity);
+        // Giảm stock
         drug.pack -= Number(quantity);
         await drug.save();
-        res.send({ message: `Purchased ${quantity} pack(s) of ${drug.name}. Remaining: ${drug.pack}` });
+        // Lưu transaction
+        const transaction = new TransactionDB({
+            drugId: drug._id,
+            drugName: drug.name,
+            quantity: Number(quantity),
+            pricePerPack,
+            totalPrice
+        });
+        await transaction.save();
+        res.send({ message: `Purchased ${quantity} pack(s) of ${drug.name}. Total: ${totalPrice} VND. Remaining: ${drug.pack}` });
     } catch (err) {
         res.status(500).send({ message: err.message || "Error during purchase" });
     }
